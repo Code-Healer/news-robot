@@ -13,13 +13,14 @@ class APNewsRobot:
         self.url = "https://apnews.com/"
 
     def load_driver(self, driver):
-        self.driver = driver
-
+        self.driver = driver    
+    
     def execute_search(self, phrase_to_search):
         search_btn = WebDriverWait(self.driver, 5).until(
             EC.element_to_be_clickable(
                 (By.CLASS_NAME, 'SearchOverlay-search-button'))
         )
+        self.driver.get_screenshot_as_file('output/coockies_img.png')
         search_btn.click()
 
         search_input = self.driver.find_element(

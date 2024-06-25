@@ -6,12 +6,12 @@ from utils import download_image
 from models import News
 
 class APNewsRobot:
-    def __init__(self, driver):
-        self.driver = driver
+    def __init__(self):
+        self.driver = None
         self.url = "https://apnews.com/"
 
-    def open_website(self):
-        self.driver.get(self.url)
+    def load_driver(self, driver):
+        self.driver = driver
 
     def execute_search(self, phrase_to_search):
         search_btn = self.driver.find_element(

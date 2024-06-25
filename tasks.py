@@ -1,7 +1,7 @@
 from robocorp.tasks import task
-from selenium.webdriver import Chrome
-from selenium.webdriver.chrome.options import ChromiumOptions
-
+# from selenium.webdriver import Chrome, ChromeOptions
+from RPA.Browser.Selenium import Selenium, ChromeOptions
+from selenium.webdriver.common.by import By
 from apnews_robot import APNewsRobot
 from utils import save_dict_in_excel
 
@@ -11,11 +11,17 @@ class Settings:
 
 @task
 def minimal_task():
-    options = ChromiumOptions()
+    news_robot = APNewsRobot()
+
+    options = ChromeOptions()
     options.page_load_strategy = 'eager'
-    with Chrome(options=options) as driver:
-        news_robot = APNewsRobot(driver)
-        news_robot.open_website()
-        news_robot.execute_search(Settings.phrase_to_search)
-        results = news_robot.get_results()
-        save_dict_in_excel([result.get_dict() for result in results], 'news')
+    
+    browser = Selenium()
+    browser.open_available_browser(options=options)
+    browser.go_to(news_robot.url)
+    
+    news_robot.load_driver(browser.driver)
+    news_robot.execute_search(Settings.phrase_to_search)
+    
+    results = news_robot.get_results()
+    save_dict_in_excel([result.get_dict() for result in results], 'news')

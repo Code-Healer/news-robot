@@ -2,7 +2,7 @@ from datetime import datetime
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException 
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
 from utils import download_image
 from models import News
@@ -15,6 +15,18 @@ class APNewsRobot:
     def load_driver(self, driver):
         self.driver = driver    
     
+    def acept_onetrust_banner(self):
+        try:
+            ontrust_cookies_btn = WebDriverWait(self.driver, 5).until(
+                EC.element_to_be_clickable(
+                    (By.ID, 'onetrust-accept-btn-handler'))
+            )
+            ontrust_cookies_btn.click()
+        except TimeoutException:
+            print('Cookies popup not found')
+
+        
+
     def execute_search(self, phrase_to_search):
         search_btn = WebDriverWait(self.driver, 5).until(
             EC.element_to_be_clickable(

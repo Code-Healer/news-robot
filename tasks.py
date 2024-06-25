@@ -1,3 +1,4 @@
+import os
 from robocorp.tasks import task
 # from selenium.webdriver import Chrome, ChromeOptions
 from RPA.Browser.Selenium import Selenium, ChromeOptions
@@ -11,6 +12,7 @@ class Settings:
 
 @task
 def minimal_task():
+    os.makedirs('output/images')
     news_robot = APNewsRobot()
 
     options = ChromeOptions()
@@ -21,7 +23,8 @@ def minimal_task():
     browser.go_to(news_robot.url)
     
     news_robot.load_driver(browser.driver)
+    news_robot.acept_onetrust_banner()
     news_robot.execute_search(Settings.phrase_to_search)
-    
+
     results = news_robot.get_results()
     save_dict_in_excel([result.get_dict() for result in results], 'news')

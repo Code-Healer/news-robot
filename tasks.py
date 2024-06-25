@@ -3,6 +3,7 @@ from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import ChromiumOptions
 
 from apnews_robot import APNewsRobot
+from utils import save_dict_in_excel
 
 class Settings:
     news_website: str = "APNEWS"
@@ -17,3 +18,4 @@ def minimal_task():
         news_robot.open_website()
         news_robot.execute_search(Settings.phrase_to_search)
         results = news_robot.get_results()
+        save_dict_in_excel([result.get_dict() for result in results], 'news')

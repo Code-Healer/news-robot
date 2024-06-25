@@ -1,5 +1,7 @@
 from datetime import datetime
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException 
 
 from utils import download_image
@@ -14,8 +16,9 @@ class APNewsRobot:
         self.driver = driver
 
     def execute_search(self, phrase_to_search):
-        search_btn = self.driver.find_element(
-            By.CLASS_NAME, 'SearchOverlay-search-button'
+        search_btn = WebDriverWait(self.driver, 5).until(
+            EC.element_to_be_clickable(
+                (By.CLASS_NAME, 'SearchOverlay-search-button'))
         )
         search_btn.click()
 

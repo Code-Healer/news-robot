@@ -12,7 +12,9 @@ class Settings:
 
 @task
 def minimal_task():
-    os.makedirs('output/images')
+    if not os.path.isdir('output/images'):
+        os.makedirs('output/images')
+    
     news_robot = APNewsRobot()
 
     options = ChromeOptions()

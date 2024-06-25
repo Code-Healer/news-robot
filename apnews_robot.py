@@ -13,22 +13,19 @@ class APNewsRobot:
         self.url = "https://apnews.com/"
 
     def load_driver(self, driver):
-        self.driver = driver    
+        self.driver = driver
     
     def acept_onetrust_banner(self):
         try:
-            ontrust_cookies_btn = WebDriverWait(self.driver, 5).until(
-                EC.element_to_be_clickable(
-                    (By.ID, 'onetrust-accept-btn-handler'))
-            )
+            ontrust_cookies_btn = self.driver.find_element(
+                By.ID, 'onetrust-accept-btn-handler')
             ontrust_cookies_btn.click()
-        except TimeoutException:
-            print('Cookies popup not found')
-
+        except NoSuchElementException:
+            print("Element not found")
         
 
     def execute_search(self, phrase_to_search):
-        search_btn = WebDriverWait(self.driver, 5).until(
+        search_btn = WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable(
                 (By.CLASS_NAME, 'SearchOverlay-search-button'))
         )

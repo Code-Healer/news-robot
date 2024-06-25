@@ -5,8 +5,8 @@ from utils import save_dict_in_excel
 
 def get_search_params():
     return {
-        "phrase_to_search": "Eua Election",
-        "months": 2
+        "phrase_to_search": "Olimpic Games",
+        "months": 1
     }
 
 @task
@@ -26,4 +26,7 @@ def minimal_task():
     news_robot.execute_search(search_params)
 
     results = news_robot.get_results()
-    save_dict_in_excel([result.get_dict() for result in results], 'news')
+    if len(results) > 0:
+        save_dict_in_excel([result.get_dict() for result in results], 'news')
+    else:
+        save_dict_in_excel([{'results': 'not found'}], 'news_not_found')

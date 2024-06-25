@@ -45,10 +45,11 @@ class APNewsRobot:
 
     def get_results(self):
         items = self.driver.find_elements(
-        By.CSS_SELECTOR, 
-            ('div.SearchResultsModule-results div.PageList-items '
-            'div.PageList-items-item')
+            By.CSS_SELECTOR, 
+                ('div.SearchResultsModule-results div.PageList-items '
+                'div.PageList-items-item')
         )
+        
         results = []
         for item in items:
             news_item = self.apnews_element_parser(item)

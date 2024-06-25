@@ -3,7 +3,7 @@ from RPA.Excel.Files import Files
 
 def download_image(url: str, filename: str):
     http = HTTP()
-    http.download(url, f'output/images/{filename}', overwrite=True)
+    http.download(url, f'output/{filename}', overwrite=True)
 
 def save_dict_in_excel(data: dict, filename: str):
     excel = Files()    

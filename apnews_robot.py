@@ -16,12 +16,11 @@ class APNewsRobot:
         self.driver = driver
     
     def acept_onetrust_banner(self):
-        try:
-            ontrust_cookies_btn = self.driver.find_element(
-                By.ID, 'onetrust-accept-btn-handler')
-            ontrust_cookies_btn.click()
-        except NoSuchElementException:
-            print("Element not found")
+        onetrust_cookies_btn = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable((By.ID, 'onetrust-accept-btn-handler'))
+        )
+
+        onetrust_cookies_btn.click()
         
 
     def execute_search(self, phrase_to_search):

@@ -17,7 +17,7 @@ class News:
         return {
             "title": self.title,
             "description": self.description,
-            "post_datetime": self.post_datetime,
+            "post_datetime": self.post_datetime.strftime("%Y-%m-%d %H:%M:%S"),
             "img_file_name": self.img_file_name,
         }
 

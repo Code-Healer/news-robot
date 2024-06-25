@@ -1,17 +1,17 @@
-import os
 from robocorp.tasks import task
-# from selenium.webdriver import Chrome, ChromeOptions
 from RPA.Browser.Selenium import Selenium, ChromeOptions
-from selenium.webdriver.common.by import By
 from apnews_robot import APNewsRobot
 from utils import save_dict_in_excel
 
-class Settings:
-    news_website: str = "APNEWS"
-    phrase_to_search: str = "EUA Election"
+def get_search_params():
+    return {
+        "phrase_to_search": "Eua Election",
+        "months": 2
+    }
 
 @task
 def minimal_task():
+    search_params = get_search_params()
     news_robot = APNewsRobot()
 
     options = ChromeOptions()
@@ -23,7 +23,7 @@ def minimal_task():
     
     news_robot.load_driver(browser.driver)
     news_robot.acept_onetrust_banner()
-    news_robot.execute_search(Settings.phrase_to_search)
+    news_robot.execute_search(search_params)
 
     results = news_robot.get_results()
     save_dict_in_excel([result.get_dict() for result in results], 'news')

@@ -4,7 +4,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
-from utils import download_image, get_period, is_date_within_period
+from utils import (
+    download_image, get_period, is_date_within_period, check_money_values)
 from models import News
 
 class APNewsRobot:
@@ -57,6 +58,7 @@ class APNewsRobot:
         
         results = []
         for item in items:
+            print(item.get_attribute("innerHTML"))
             news_item = self.apnews_element_parser(item)
 
             period = get_period(self.search_params.get('months', 1))
@@ -84,6 +86,10 @@ class APNewsRobot:
         else:
             apnews_item.img_file_name = "Image Not Found"
 
+        apnews_item.have_money_values = check_money_values(
+            " ".join([apnews_item.title, apnews_item.description])
+        )
+
         return apnews_item
 
 
@@ -94,10 +100,16 @@ class APNewsRobot:
         ).text
 
     def _parse_description(self, item_content):
-        return item_content.find_element(
-            By.CSS_SELECTOR,
-            "div.PagePromo-description span.PagePromoContentIcons-text"
-        ).text
+        description = ""
+        try: 
+            description = item_content.find_element(
+                By.CSS_SELECTOR,
+                "div.PagePromo-description span.PagePromoContentIcons-text"
+            ).text
+        except NoSuchElementException:
+            description = "Post without description"
+
+        return description
 
     def _parse_post_datetime(self, item_content):
         timestamp_str = item_content.find_element(

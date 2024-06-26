@@ -1,4 +1,5 @@
 from datetime import datetime
+import re
 
 from RPA.HTTP import HTTP
 from RPA.Excel.Files import Files
@@ -39,3 +40,16 @@ def get_period(months: int):
 def is_date_within_period(date_to_check: datetime, period: tuple) -> bool:
     start_date, end_date = period
     return start_date <= date_to_check <= end_date
+
+
+def check_money_values(text):
+        patterns = [
+            r'\$\d{1,3}(,\d{3})*(\.\d{2})?',
+            r'\b\d{1,3}(,\d{3})*(\.\d{2})? dollars\b',
+            r'\b\d{1,3}(,\d{3})*(\.\d{2})? USD\b'
+        ]
+
+        for pattern in patterns:
+            if re.search(pattern, text):
+                return True
+        return False

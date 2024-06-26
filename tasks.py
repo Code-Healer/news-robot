@@ -5,7 +5,7 @@ from utils import save_dict_in_excel
 
 def get_search_params():
     return {
-        "phrase_to_search": "Olimpic Games",
+        "phrase_to_search": "EUA Elections",
         "months": 1
     }
 

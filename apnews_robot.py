@@ -21,7 +21,6 @@ class APNewsRobot:
         )
 
         onetrust_privacy_popup_btn.click()
-        
 
     def execute_search(self, search_params: dict):
         self.search_params = search_params
@@ -57,7 +56,7 @@ class APNewsRobot:
             period = get_period(self.search_params.get('months', 1))
             if is_date_within_period(news_item.post_datetime, period):
                 results.append(news_item)
-            
+
                 if news_item.have_image():
                     download_image(news_item.img_link, news_item.img_file_name)
                     
@@ -68,36 +67,11 @@ class APNewsRobot:
             By.CSS_SELECTOR, 'div.PagePromo-content'
         )
         apnews_item = News()
-        
-        apnews_item.title = content.find_element(
-            By.CSS_SELECTOR,
-            "div.PagePromo-title span.PagePromoContentIcons-text"
-        ).text
 
-        print(f"Parsing data to:{apnews_item.title}...")
-
-        apnews_item.description = content.find_element(
-            By.CSS_SELECTOR,
-            "div.PagePromo-description span.PagePromoContentIcons-text"
-        ).text
-
-        timestamp_str = content.find_element(
-            By.CSS_SELECTOR,
-            'div.PagePromo-date bsp-timestamp'
-        ).get_dom_attribute('data-timestamp')
-
-        apnews_item.post_datetime = datetime.fromtimestamp(int(timestamp_str) / 1e3)
-        
-        try: 
-            media = base_item_element.find_element(
-                By.CSS_SELECTOR, 'div.PagePromo>div.PagePromo-media'
-            )
-            
-            apnews_item.img_link = media.find_element(
-                By.CSS_SELECTOR, 'img.Image'
-            ).get_dom_attribute('src')
-        except NoSuchElementException:
-            apnews_item.img_link = None
+        apnews_item.title = self._parse_title(content)
+        apnews_item.description = self._parse_description(content)
+        apnews_item.post_datetime = self._parse_post_datetime(content)
+        apnews_item.img_link = self._parse_img_link(base_item_element)
 
         if apnews_item.have_image():
             apnews_item.img_file_name =  f'{apnews_item.code}.webp' 
@@ -105,3 +79,37 @@ class APNewsRobot:
             apnews_item.img_file_name = "Image Not Found"
 
         return apnews_item
+
+
+    def _parse_title(self, item_content):
+        return item_content.find_element(
+            By.CSS_SELECTOR,
+            "div.PagePromo-title span.PagePromoContentIcons-text"
+        ).text
+
+    def _parse_description(self, item_content):
+        return item_content.find_element(
+            By.CSS_SELECTOR,
+            "div.PagePromo-description span.PagePromoContentIcons-text"
+        ).text
+
+    def _parse_post_datetime(self, item_content):
+        timestamp_str = item_content.find_element(
+            By.CSS_SELECTOR,
+            'div.PagePromo-date bsp-timestamp'
+        ).get_dom_attribute('data-timestamp')
+
+        return datetime.fromtimestamp(int(timestamp_str) / 1e3)
+
+    def _parse_img_link(self, base_item_element):
+        try:
+            media = base_item_element.find_element(
+                By.CSS_SELECTOR, 'div.PagePromo>div.PagePromo-media'
+            )
+            
+            img_link = media.find_element(By.CSS_SELECTOR, 'img.Image')\
+                .get_dom_attribute('src')
+            
+            return img_link
+        except NoSuchElementException:
+            return None

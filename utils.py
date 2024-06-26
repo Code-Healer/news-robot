@@ -9,6 +9,7 @@ def download_image(url: str, filename: str):
     http = HTTP()
     http.download(url, f'output/{filename}', overwrite=True)
 
+
 def save_dict_in_excel(data: dict, filename: str):
     excel = Files()    
     excel.create_workbook(f"output/{filename}.xlsx")
@@ -21,6 +22,7 @@ def save_dict_in_excel(data: dict, filename: str):
     
     excel.save_workbook()
     excel.close_workbook()
+
 
 def get_period(months: int):
     today = datetime.today()
@@ -37,19 +39,26 @@ def get_period(months: int):
 
     return (start_date, end_date)
 
+
 def is_date_within_period(date_to_check: datetime, period: tuple) -> bool:
     start_date, end_date = period
     return start_date <= date_to_check <= end_date
 
 
 def check_money_values(text):
-        patterns = [
-            r'\$\d{1,3}(,\d{3})*(\.\d{2})?',
-            r'\b\d{1,3}(,\d{3})*(\.\d{2})? dollars\b',
-            r'\b\d{1,3}(,\d{3})*(\.\d{2})? USD\b'
-        ]
+    patterns = [
+        r'\$\d{1,3}(,\d{3})*(\.\d{2})?',
+        r'\b\d{1,3}(,\d{3})*(\.\d{2})? dollars\b',
+        r'\b\d{1,3}(,\d{3})*(\.\d{2})? USD\b'
+    ]
 
-        for pattern in patterns:
-            if re.search(pattern, text):
-                return True
-        return False
+    for pattern in patterns:
+        if re.search(pattern, text):
+            return True
+    return False
+
+
+def count_occurrences(subtext, text):
+    escaped_subtext = re.escape(subtext)
+    occurrences = re.findall(escaped_subtext, text, re.IGNORECASE)
+    return len(occurrences)

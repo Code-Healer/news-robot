@@ -6,6 +6,7 @@ class News:
         self.img_file_name = None
         self.img_link = None
         self.have_money_values = None
+        self.count_of_search_phrase = None
 
     @property
     def code(self):
@@ -21,6 +22,7 @@ class News:
             "post_datetime": self.post_datetime.strftime("%Y-%m-%d %H:%M:%S"),
             "img_file_name": self.img_file_name,
             "have_money_values": self.have_money_values,
+            "count_of_search_phrase": self.count_of_search_phrase,
         }
 
     def have_image(self):

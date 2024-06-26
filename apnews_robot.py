@@ -5,7 +5,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
 from utils import (
-    download_image, get_period, is_date_within_period, check_money_values)
+    download_image, get_period, is_date_within_period, check_money_values, 
+    count_occurrences
+)
 from models import News
 
 class APNewsRobot:
@@ -87,6 +89,11 @@ class APNewsRobot:
             apnews_item.img_file_name = "Image Not Found"
 
         apnews_item.have_money_values = check_money_values(
+            " ".join([apnews_item.title, apnews_item.description])
+        )
+
+        apnews_item.count_of_search_phrase = count_occurrences(
+            self.search_params.get("phrase_to_search"),
             " ".join([apnews_item.title, apnews_item.description])
         )
 

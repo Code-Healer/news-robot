@@ -5,8 +5,8 @@ from utils import save_dict_in_excel
 
 def get_search_params():
     return {
-        "phrase_to_search": "Dollar today",
-        "months": 5
+        "phrase_to_search": "Dollar",
+        "months": 1
     }
 
 @task

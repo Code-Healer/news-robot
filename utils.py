@@ -11,7 +11,7 @@ def download_image(url: str, filename: str):
 
 
 def save_dict_in_excel(data: dict, filename: str):
-    excel = Files()    
+    excel = Files()
     excel.create_workbook(f"output/{filename}.xlsx")
     
     headers = list(data[0].keys())

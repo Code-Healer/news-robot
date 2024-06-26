@@ -1,13 +1,18 @@
+from robocorp import workitems
 from robocorp.tasks import task
 from RPA.Browser.Selenium import Selenium, ChromeOptions
 from apnews_robot import APNewsRobot
 from utils import save_dict_in_excel
 
 def get_search_params():
-    return {
+    """
+    {
         "phrase_to_search": "Dollar",
         "months": 1
     }
+    """
+    item = workitems.inputs.current
+    return item.payload
 
 @task
 def minimal_task():

@@ -6,7 +6,7 @@ class SearchParamsAdapter:
         self._sort_by = params_payload.get('sort_by')
         self.DEFAULT_MONTH = 1
         self.DEFAULT_SORT_BY = "Relevance"
-        self.DEFAULT_PHRASE = "Today"
+        self.DEFAULT_PHRASE = "Olimpic Games"
 
     @property
     def months(self):

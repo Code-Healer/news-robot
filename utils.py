@@ -42,7 +42,10 @@ def get_period(months: int):
 
 def is_date_within_period(date_to_check: datetime, period: tuple) -> bool:
     start_date, end_date = period
-    return start_date <= date_to_check <= end_date
+    if date_to_check:
+        return start_date <= date_to_check <= end_date
+
+    return False
 
 
 def check_money_values(text):

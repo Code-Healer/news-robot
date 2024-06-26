@@ -38,6 +38,7 @@ def minimal_task():
 
     news_robot.dismiss_onetrust_banner()
     news_robot.execute_search(search_params)
+    news_robot.select_sort_by_options()   
 
     results = news_robot.get_results()
     if len(results) > 0:

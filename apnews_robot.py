@@ -2,7 +2,8 @@ from datetime import datetime
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.common.exceptions import (NoSuchElementException, 
+TimeoutException, StaleElementReferenceException)
 
 
 from utils import (
@@ -10,6 +11,8 @@ from utils import (
     count_occurrences
 )
 from models import News
+
+IGNORED_EXCEPTIONS = (StaleElementReferenceException)
 
 class APNewsRobot:
     def __init__(self):
@@ -67,16 +70,16 @@ class APNewsRobot:
         select.select_by_visible_text(self.search_params.sort_by)
 
     def get_results(self):
-        items = self.driver.find_elements(
-            By.CSS_SELECTOR, 
+        items = WebDriverWait(self.driver, 10, ignored_exceptions=IGNORED_EXCEPTIONS).until(
+            EC.presence_of_all_elements_located(
+                (By.CSS_SELECTOR, 
                 ('div.SearchResultsModule-results div.PageList-items '
-                'div.PageList-items-item')
-        )
+                'div.PageList-items-item'))
+        ))
         
         results = []
         for item in items:
             news_item = self.apnews_element_parser(item)
-
             period = get_period(self.search_params.months)
             if is_date_within_period(news_item.post_datetime, period):
                 results.append(news_item)
@@ -87,9 +90,13 @@ class APNewsRobot:
         return results
 
     def apnews_element_parser(self, base_item_element):
-        content = base_item_element.find_element(
-            By.CSS_SELECTOR, 'div.PagePromo-content'
+        content = WebDriverWait(base_item_element, 25, ignored_exceptions=IGNORED_EXCEPTIONS).until(
+                EC.presence_of_element_located((
+                    By.CSS_SELECTOR, 'div.PagePromo-content'
+                )
+            )
         )
+
         apnews_item = News()
 
         apnews_item.title = self._parse_title(content)
@@ -114,10 +121,15 @@ class APNewsRobot:
         return apnews_item
 
     def _parse_title(self, item_content):
-        return item_content.find_element(
-            By.CSS_SELECTOR,
-            "div.PagePromo-title span.PagePromoContentIcons-text"
-        ).text
+        try: 
+            title = item_content.find_element(
+                By.CSS_SELECTOR,
+                "div.PagePromo-title span.PagePromoContentIcons-text"
+            ).text
+        except NoSuchElementException:
+            title = "Post without Title"
+
+        return title
 
     def _parse_description(self, item_content):
         description = ""
@@ -132,22 +144,29 @@ class APNewsRobot:
         return description
 
     def _parse_post_datetime(self, item_content):
-        timestamp_str = item_content.find_element(
-            By.CSS_SELECTOR,
-            'div.PagePromo-date bsp-timestamp'
-        ).get_dom_attribute('data-timestamp')
+        try:
+            timestamp_str = item_content.find_element(
+                By.CSS_SELECTOR,
+                'div.PagePromo-date bsp-timestamp'
+            ).get_dom_attribute('data-timestamp')
 
-        return datetime.fromtimestamp(int(timestamp_str) / 1e3)
+            return datetime.fromtimestamp(int(timestamp_str) / 1e3)
+        except NoSuchElementException:
+            return None
 
     def _parse_img_link(self, base_item_element):
         try:
-            media = base_item_element.find_element(
-                By.CSS_SELECTOR, 'div.PagePromo>div.PagePromo-media'
-            )
+            media = WebDriverWait(
+                base_item_element, 
+                5,
+                ignored_exceptions=IGNORED_EXCEPTIONS).until(
+                EC.presence_of_element_located(
+                    (By.CSS_SELECTOR, 'div.PagePromo>div.PagePromo-media')
+            ))
             
             img_link = media.find_element(By.CSS_SELECTOR, 'img.Image')\
                 .get_dom_attribute('src')
             
             return img_link
-        except NoSuchElementException:
+        except (NoSuchElementException, TimeoutException):
             return None

@@ -22,7 +22,8 @@ def minimal_task():
     browser.go_to(news_robot.url)
     
     news_robot.load_driver(browser.driver)
-    news_robot.acept_onetrust_banner()
+
+    news_robot.dismiss_onetrust_banner()
     news_robot.execute_search(search_params)
 
     results = news_robot.get_results()

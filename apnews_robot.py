@@ -2,7 +2,7 @@ from datetime import datetime
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
 from utils import download_image, get_period, is_date_within_period
 from models import News
@@ -15,12 +15,18 @@ class APNewsRobot:
     def load_driver(self, driver):
         self.driver = driver
     
-    def acept_onetrust_banner(self):
-        onetrust_privacy_popup_btn = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.ID, 'onetrust-accept-btn-handler'))
-        )
+    def dismiss_onetrust_banner(self):
+        self.driver.get_screenshot_as_file('output/onetrust_popup.png')
+        try:
+            onetrust_privacy_popup_btn = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable(
+                    (By.ID, 'onetrust-accept-btn-handler')
+                )
+            )
 
-        onetrust_privacy_popup_btn.click()
+            onetrust_privacy_popup_btn.click()
+        except TimeoutException:
+            print("onetrust banner did't open")
 
     def execute_search(self, search_params: dict):
         self.search_params = search_params

@@ -3,24 +3,32 @@ from robocorp.tasks import task
 from RPA.Browser.Selenium import Selenium, ChromeOptions
 from apnews_robot import APNewsRobot
 from utils import save_dict_in_excel
+from search_adapter import SearchParamsAdapter
 
 def get_search_params():
     """
     {
-        "phrase_to_search": "Dollar",
-        "months": 1
+        "phrase": "Lorem ipsum dolor sit amet",
+        "months": positive integer,
+        "sort_by": "Relevance | Newest | Oldest
     }
     """
-    item = workitems.inputs.current
-    return item.payload
+    search_params = SearchParamsAdapter(workitems.inputs.current.payload)
+    return search_params
 
 @task
 def minimal_task():
     search_params = get_search_params()
+
+    search_params.get_dict()
     news_robot = APNewsRobot()
 
     options = ChromeOptions()
     options.page_load_strategy = 'eager'
+    options.add_argument('--disable-blink-features=AutomationControlled')
+    options.add_argument("--disable-extensions")
+    options.add_experimental_option('useAutomationExtension', False)
+    options.add_experimental_option("excludeSwitches", ["enable-automation"])
     
     browser = Selenium()
     browser.open_available_browser(options=options)

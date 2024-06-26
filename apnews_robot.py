@@ -1,8 +1,9 @@
 from datetime import datetime
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
+
 
 from utils import (
     download_image, get_period, is_date_within_period, check_money_values, 
@@ -27,9 +28,6 @@ class APNewsRobot:
                 )
             )
 
-            # onetrust_privacy_popup_btn = self.driver.find_element(
-            #     By.ID, 'onetrust-accept-btn-handler'
-            # )
             self.driver.get_screenshot_as_file('output/onetrust_popup.png')
             onetrust_privacy_popup_btn.click()
             print("onetrust banner open")
@@ -38,7 +36,7 @@ class APNewsRobot:
         except TimeoutException:
             print("onetrust banner didn't open: Timeout")
 
-    def execute_search(self, search_params: dict):
+    def execute_search(self, search_params):
         self.search_params = search_params
 
         search_btn = WebDriverWait(self.driver, 10).until(
@@ -51,12 +49,22 @@ class APNewsRobot:
         search_input = self.driver.find_element(
             By.CLASS_NAME, 'SearchOverlay-search-input'
         )
-        search_input.send_keys(self.search_params.get('phrase_to_search'))
+        search_input.send_keys(self.search_params.phrase)
 
         search_submit = self.driver.find_element(
             By.CLASS_NAME, 'SearchOverlay-search-submit'
         )
         search_submit.click()
+
+    def select_sort_by_options(self):
+        sort_by_dropdown_el = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable(
+                (By.CLASS_NAME, 'Select-input')
+            )
+        )
+
+        select = Select(sort_by_dropdown_el)
+        select.select_by_visible_text(self.search_params.sort_by)
 
     def get_results(self):
         items = self.driver.find_elements(
@@ -69,7 +77,7 @@ class APNewsRobot:
         for item in items:
             news_item = self.apnews_element_parser(item)
 
-            period = get_period(self.search_params.get('months', 1))
+            period = get_period(self.search_params.months)
             if is_date_within_period(news_item.post_datetime, period):
                 results.append(news_item)
 
@@ -99,12 +107,11 @@ class APNewsRobot:
         )
 
         apnews_item.count_of_search_phrase = count_occurrences(
-            self.search_params.get("phrase_to_search"),
+            self.search_params.phrase,
             " ".join([apnews_item.title, apnews_item.description])
         )
 
         return apnews_item
-
 
     def _parse_title(self, item_content):
         return item_content.find_element(

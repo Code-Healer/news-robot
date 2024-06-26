@@ -21,15 +21,22 @@ class APNewsRobot:
     def dismiss_onetrust_banner(self):
         self.driver.get_screenshot_as_file('output/onetrust_popup.png')
         try:
-            onetrust_privacy_popup_btn = WebDriverWait(self.driver, 10).until(
+            onetrust_privacy_popup_btn = WebDriverWait(self.driver, 20).until(
                 EC.element_to_be_clickable(
                     (By.ID, 'onetrust-accept-btn-handler')
                 )
             )
 
+            # onetrust_privacy_popup_btn = self.driver.find_element(
+            #     By.ID, 'onetrust-accept-btn-handler'
+            # )
+            self.driver.get_screenshot_as_file('output/onetrust_popup.png')
             onetrust_privacy_popup_btn.click()
+            print("onetrust banner open")
+        except NoSuchElementException:
+            print("onetrust banner didn't open: Not Found")
         except TimeoutException:
-            print("onetrust banner did't open")
+            print("onetrust banner didn't open: Timeout")
 
     def execute_search(self, search_params: dict):
         self.search_params = search_params
@@ -38,8 +45,8 @@ class APNewsRobot:
             EC.element_to_be_clickable(
                 (By.CLASS_NAME, 'SearchOverlay-search-button'))
         )
-        self.driver.get_screenshot_as_file('output/privacy_popup_img.png')
-        search_btn.click()
+        
+        search_btn.click()        
 
         search_input = self.driver.find_element(
             By.CLASS_NAME, 'SearchOverlay-search-input'
@@ -60,7 +67,6 @@ class APNewsRobot:
         
         results = []
         for item in items:
-            print(item.get_attribute("innerHTML"))
             news_item = self.apnews_element_parser(item)
 
             period = get_period(self.search_params.get('months', 1))

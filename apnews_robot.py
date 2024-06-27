@@ -90,9 +90,9 @@ class APNewsRobot:
         return results
 
     def apnews_element_parser(self, base_item_element):
-        content = WebDriverWait(base_item_element, 25, ignored_exceptions=IGNORED_EXCEPTIONS).until(
+        content = WebDriverWait(base_item_element, 20, ignored_exceptions=IGNORED_EXCEPTIONS).until(
                 EC.presence_of_element_located((
-                    By.CSS_SELECTOR, 'div.PagePromo-content'
+                    By.CSS_SELECTOR, 'div.PagePromo>div.PagePromo-content'
                 )
             )
         )

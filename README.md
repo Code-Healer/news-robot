@@ -1,60 +1,72 @@
-# Template: Python - Minimal
+# Obtaining News!
 
-This template leverages the new [Python framework](https://github.com/robocorp/robocorp), the [libraries](https://github.com/robocorp/robocorp/blob/master/docs/README.md#python-libraries) from to same project as well.
+This project aims to automatically fetch news from a specialized website, in this case, The Associated Press.
 
-The template provides you with the basic structure of a Python project: logging out of the box and controlling your tasks without fiddling with the base Python stuff. The environment contains the most used libraries, so you do not have to start thinking about those right away. 
+## Links
 
-👉 Other templates are available as well via our tooling and on our [Portal](https://robocorp.com/portal/tag/template)
+- website: https://apnews.com/
+- Repository: https://github.com/Code-Healer/news-robot
+- Robocorp: https://robocorp.com/
 
-## Running
+## How the Robot Works
 
-#### VS Code
-1. Get [Robocorp Code](https://robocorp.com/docs/developer-tools/visual-studio-code/extension-features) -extension for VS Code.
-1. You'll get an easy-to-use side panel and powerful command-palette commands for running, debugging, code completion, docs, etc.
+The robot can search for news based on a phrase and then save the results in an Excel spreadsheet. It is also possible to specify the number of months, from the current month, to extract the news from the results, which can be sorted by Relevance, Newest, or Oldest.
 
-#### Command line
+The returned spreadsheet will contain fields processed from the data extracted from the website. The fields are described below:
 
-1. [Get RCC](https://github.com/robocorp/rcc?tab=readme-ov-file#getting-started)
-1. Use the command: `rcc run`
+- title: The title of the news;
+- description: The description text;
+- post_date: The posting timestamp;
+- img_file_name: The image name generated from an ID given to the news;
+- have_money_values: Whether there is any text corresponding to monetary values;
+- count_of_search_phrase: The number of times the search phrase appears in the title or description.
 
-## Results
+In addition to the spreadsheet, images related to the news will also be downloaded.
 
-🚀 After running the bot, check out the `log.html` under the `output` -folder.
+### Parameters
 
-## Dependencies
+- phrase: must be a text;
+- months: a positive integer;
+- sort_by: "Relevance | Newest | Oldest"
 
-We strongly recommend getting familiar with adding your dependencies in [conda.yaml](conda.yaml) to control your Python dependencies and the whole Python environment for your automation.
+Below is an example of use:
 
-<details>
-  <summary>🙋‍♂️ "Why not just pip install...?"</summary>
+```json
+{
+    "phrase": "Olympic Games",
+    "months": 2,
+    "sort_by": "Newest"
+}
+```
 
-Think of [conda.yaml](conda.yaml) as an equivalent of the requirements.txt, but much better. 👩‍💻 With `conda.yaml`, you are not just controlling your PyPI dependencies; you control the complete Python environment, which makes things repeatable and easy.
+## Running in Robocorp
 
-👉 You will probably need to run your code on another machine quite soon, so by using `conda.yaml`:
-- You can avoid `Works on my machine` -cases
-- You do not need to manage Python installations on all the machines
-- You can control exactly which version of Python your automation will run on 
-  - You'll also control the pip version to avoid dep. resolution changes
-- No need for venv, pyenv, ... tooling and knowledge sharing inside your team.
-- Define dependencies in conda.yaml, let our tooling do the heavy lifting.
-- You get all the content of [conda-forge](https://prefix.dev/channels/conda-forge) without any extra tooling
+To run process (robot) in Robocorp Cloud follow instructions below:
 
-> Dive deeper with [these](https://github.com/robocorp/rcc/blob/master/docs/recipes.md#what-is-in-condayaml) resources.
+1. Click in Organization _Code Healer_ and select _Processess_ in Unatended menu
+item.
 
-</details>
-<br/>
+2. Then select `run with input data` in Run Process button
 
-> The full power of [rpaframework](https://robocorp.com/docs/python/rpa-framework) -libraries is also available on Python as a backup while we implement the new Python libraries.
+![running with data](docs/robocorp_01.png)
 
-## What now?
 
-🚀 Now, go get'em
+3. Fill items as described above, follow the image to search by Olimpic Games!
 
-Start writing Python and remember that the AI/LLM's out there are getting really good and creating Python code specifically.
+![fill data](docs/robocorp_02.png)
 
-👉 Try out [Robocorp ReMark 💬](https://chat.robocorp.com)
+4. Wait until process finish, you can visualize results clicking on link in the _process run_ column as below
 
-For more information, do not forget to check out the following:
-- [Robocorp Documentation -site](https://robocorp.com/docs)
-- [Portal for more examples](https://robocorp.com/portal)
-- Follow our main [robocorp -repository](https://github.com/robocorp/robocorp) as it is the main location where we developed the libraries and the framework.
+![process run link](docs/robocorp_03.png)
+
+5. On the next screen in performance section, click in link of _step run_ column
+
+![step run link](docs/robocorp_04.png)
+
+6. In the next screen you can see results, logs, files and the button to expand and see all assets
+
+![step run link](docs/robocorp_05.png)
+
+7. Clicking in button, and scrolling down, the spreadsheet can be found and downloaded
+
+![step run link](docs/robocorp_06.png)

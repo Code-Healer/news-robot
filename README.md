@@ -51,7 +51,7 @@ item.
 ![running with data](docs/robocorp_01.png)
 
 
-3. Fill items as described above, follow the image to search by Olimpic Games!
+3. Fill items as described above, follow the image to search by Olimpyc Games!
 
 ![fill data](docs/robocorp_02.png)
 

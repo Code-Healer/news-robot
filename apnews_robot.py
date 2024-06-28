@@ -79,12 +79,6 @@ class APNewsRobot:
         select = Select(sort_by_dropdown_el)
         select.select_by_visible_text(self.search_params.sort_by)
 
-        WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located(
-                (By.CLASS_NAME, 'SearchResultsModule-results')
-            )
-        )
-
     def get_results(self):
         """Get and format news results
         
@@ -113,7 +107,6 @@ class APNewsRobot:
                 attempts += 1
                     
         return all_results
-
 
     def load_search_result_items(self):
         items = WebDriverWait(

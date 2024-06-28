@@ -1,4 +1,5 @@
 import uuid
+import utils
 
 class News:
     def __init__(self):
@@ -33,7 +34,8 @@ class News:
         }
 
     def have_image(self):
-        return self.img_link is not None
+        return self.img_link is not None        
+
 
     def __repr__(self):
         return f"NewsData(code='{self.code}', title='{self.title})'"

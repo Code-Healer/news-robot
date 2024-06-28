@@ -7,10 +7,7 @@ TimeoutException, StaleElementReferenceException)
 from robocorp import log
 
 
-from utils import (
-    download_image, get_period, is_date_within_period, check_money_values, 
-    count_occurrences
-)
+import utils
 from models import News
 
 IGNORED_EXCEPTIONS = (StaleElementReferenceException)
@@ -20,6 +17,7 @@ class APNewsRobot:
     def __init__(self):
         self.driver = None
         self.url = "https://apnews.com/"
+        self.MAX_ATTEMPTS = 5
 
     def load_driver(self, driver):
         self.driver = driver
@@ -81,6 +79,12 @@ class APNewsRobot:
         select = Select(sort_by_dropdown_el)
         select.select_by_visible_text(self.search_params.sort_by)
 
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located(
+                (By.CLASS_NAME, 'SearchResultsModule-results')
+            )
+        )
+
     def get_results(self):
         """Get and format news results
         
@@ -88,82 +92,93 @@ class APNewsRobot:
         :rtype: News"""
 
         log.info(f"Extracting News from search results page")
+        items = self.load_search_result_items()
+        
+        all_results = []
+        attempts = 0
+        while attempts <= self.MAX_ATTEMPTS:
+            try: 
+                for item in items:
+                    news_item = self.apnews_element_parser(item)
+                    all_results.append(news_item)
+                    
+                break
+            except StaleElementReferenceException:
+                log.warn(f"the attempt number {attempts} fail trying get items")
+                all_results = []
+                items = self.load_search_result_items()
+                
+                if attempts == self.MAX_ATTEMPTS:
+                    raise 
+                attempts += 1
+                    
+        return all_results
 
+
+    def load_search_result_items(self):
         items = WebDriverWait(
             self.driver, 
             10, 
             ignored_exceptions=IGNORED_EXCEPTIONS
         ).until(
             EC.presence_of_all_elements_located(
-                (By.CSS_SELECTOR, 
-                ('div.SearchResultsModule-results div.PageList-items '
-                'div.PageList-items-item'))
+                (By.CSS_SELECTOR,
+                ('.SearchResultsModule-results div.PageList-items-item'))
         ))
-        
-        results = []
-        for item in items:
-            news_item = self.apnews_element_parser(item)
-            period = get_period(self.search_params.months)
-            if is_date_within_period(news_item.post_datetime, period):
-                results.append(news_item)
 
-                if news_item.have_image():
-                    download_image(news_item.img_link, news_item.img_file_name)
-                    
-        return results
+        return items
+
+    def generate_news_files(self, news_list, excel_name, search_params):
+        period = utils.get_period(search_params.months)
+        results = []
+        for news in news_list:
+            if utils.is_date_within_period(news.post_datetime, period):
+                results.append(news)
+
+                if news.have_image():
+                    utils.download_image(news.img_link, news.img_file_name)
+        
+        if len(results) > 0:
+            utils.save_dict_in_excel(
+                [result.get_dict() for result in results], 
+                excel_name
+            )
+        else:
+            utils.save_dict_in_excel(
+                [{'results': 'not found'}], 'news_not_found')
 
     def apnews_element_parser(self, base_item_element):
         """Format a single item result 
         
         :param base_item_element"""
+    
+        apnews_item = News()
 
-        try:
-            content = WebDriverWait(
-                base_item_element, 
-                20, 
-                ignored_exceptions=IGNORED_EXCEPTIONS
-            ).until(
-                    EC.presence_of_element_located((
-                        By.CSS_SELECTOR, 'div.PagePromo>div.PagePromo-content'
-                    )
-                )
-            )
+        apnews_item.title = self._parse_title(base_item_element)
+        apnews_item.description = self._parse_description(base_item_element)
+        apnews_item.post_datetime = self._parse_post_datetime(base_item_element)
+        apnews_item.img_link = self._parse_img_link(base_item_element)
 
-            apnews_item = News()
+        if apnews_item.have_image():
+            apnews_item.img_file_name =  f'{apnews_item.code}.webp' 
+        else:
+            apnews_item.img_file_name = "Image Not Found"
 
-            apnews_item.title = self._parse_title(content)
-            apnews_item.description = self._parse_description(content)
-            apnews_item.post_datetime = self._parse_post_datetime(content)
-            apnews_item.img_link = self._parse_img_link(base_item_element)
+        apnews_item.have_money_values = utils.check_money_values(
+            " ".join([apnews_item.title, apnews_item.description])
+        )
 
-            if apnews_item.have_image():
-                apnews_item.img_file_name =  f'{apnews_item.code}.webp' 
-            else:
-                apnews_item.img_file_name = "Image Not Found"
-
-            apnews_item.have_money_values = check_money_values(
-                " ".join([apnews_item.title, apnews_item.description])
-            )
-
-            apnews_item.count_of_search_phrase = count_occurrences(
-                self.search_params.phrase,
-                " ".join([apnews_item.title, apnews_item.description])
-            )
-            log.info(f"Item {apnews_item} extracted")
-            return apnews_item
-        except Exception as err:
-            err_class = type(err).__name__
-            log.exception("Error raised during CONTENT item parsing:", 
-                          err_class)
-            
-            raise
+        apnews_item.count_of_search_phrase = utils.count_occurrences(
+            self.search_params.phrase,
+            " ".join([apnews_item.title, apnews_item.description])
+        )
+        log.info(f"Item {apnews_item} extracted")
+        return apnews_item
+        
 
     def _parse_title(self, item_content):
-        try: 
-            title = item_content.find_element(
-                By.CSS_SELECTOR,
-                "div.PagePromo-title span.PagePromoContentIcons-text"
-            ).text
+        try:
+            title = item_content.find_element(By.CLASS_NAME, 'PagePromoContentIcons-text').text
         except NoSuchElementException:
             log.warn("post without title")
             title = "Post without Title"
@@ -179,10 +194,7 @@ class APNewsRobot:
     def _parse_description(self, item_content):
         description = ""
         try: 
-            description = item_content.find_element(
-                By.CSS_SELECTOR,
-                "div.PagePromo-description span.PagePromoContentIcons-text"
-            ).text
+            description = item_content.find_element(By.CLASS_NAME, 'PagePromo-description').text
         except NoSuchElementException:
             log.warn("Post without DESCRIPTION...")
             description = "Post without description"
@@ -198,10 +210,9 @@ class APNewsRobot:
 
     def _parse_post_datetime(self, item_content):
         try:
-            timestamp_str = item_content.find_element(
-                By.CSS_SELECTOR,
-                'div.PagePromo-date bsp-timestamp'
-            ).get_dom_attribute('data-timestamp')
+            timestamp_str = item_content\
+                .find_element(By.TAG_NAME, 'bsp-timestamp')\
+                    .get_attribute('data-timestamp')
 
             return datetime.fromtimestamp(int(timestamp_str) / 1e3)
         except NoSuchElementException:
@@ -217,17 +228,7 @@ class APNewsRobot:
 
     def _parse_img_link(self, base_item_element):
         try:
-            media = WebDriverWait(
-                base_item_element, 
-                5,
-                ignored_exceptions=IGNORED_EXCEPTIONS).until(
-                EC.presence_of_element_located(
-                    (By.CSS_SELECTOR, 'div.PagePromo>div.PagePromo-media')
-            ))
-            
-            img_link = media.find_element(By.CSS_SELECTOR, 'img.Image')\
-                .get_dom_attribute('src')
-            
+            img_link = base_item_element.find_element(By.CLASS_NAME, 'Image').get_attribute('src')
             return img_link
         except (NoSuchElementException, TimeoutException):
             log.warn("News without image")

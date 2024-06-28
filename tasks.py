@@ -46,7 +46,4 @@ def minimal_task():
     news_robot.select_sort_by_options()   
 
     results = news_robot.get_results()
-    if len(results) > 0:
-        save_dict_in_excel([result.get_dict() for result in results], 'news')
-    else:
-        save_dict_in_excel([{'results': 'not found'}], 'news_not_found')
+    news_robot.generate_news_files(results, "News", search_params)

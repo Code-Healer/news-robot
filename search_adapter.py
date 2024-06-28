@@ -1,4 +1,7 @@
+from robocorp import log
+
 class SearchParamsAdapter:
+    """Adapter to handle search params"""
     def __init__(self, params_payload: dict):
         params_payload = params_payload or {}
         self._phrase = params_payload.get('phrase')
@@ -34,6 +37,6 @@ class SearchParamsAdapter:
             "sort_by": self.sort_by
         }
 
-        print(f"PARAMS IN: {search_dict}")
+        log.info(f"SEARCH PARAMS: {search_dict}")
 
         return search_dict

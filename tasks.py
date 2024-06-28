@@ -1,4 +1,4 @@
-from robocorp import workitems
+from robocorp import workitems, log
 from robocorp.tasks import task
 from RPA.Browser.Selenium import Selenium, ChromeOptions
 from apnews_robot import APNewsRobot
@@ -7,6 +7,9 @@ from search_adapter import SearchParamsAdapter
 
 def get_search_params():
     """
+    a function to get search params from work items or other sources.
+
+    Item payload:
     {
         "phrase": "Lorem ipsum dolor sit amet",
         "months": positive integer,
@@ -32,6 +35,8 @@ def minimal_task():
     
     browser = Selenium()
     browser.open_available_browser(options=options)
+
+    log.info(f"Starting Browser in: {news_robot.url}")
     browser.go_to(news_robot.url)
     
     news_robot.load_driver(browser.driver)
